@@ -9,12 +9,37 @@ from datetime import datetime
 import os
 
 
+class HTTPMethodOverrideMiddleware(object):
+    allowed_methods = frozenset([
+        'GET',
+        'HEAD',
+        'POST',
+        'DELETE',
+        'PUT',
+        'PATCH',
+        'OPTIONS'
+    ])
+    bodyless_methods = frozenset(['GET', 'HEAD', 'OPTIONS', 'DELETE'])
+
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        method = environ.get('HTTP_X_HTTP_METHOD_OVERRIDE', '').upper()
+        if method in self.allowed_methods:
+            environ['REQUEST_METHOD'] = method
+        if method in self.bodyless_methods:
+            environ['CONTENT_LENGTH'] = '0'
+        return self.app(environ, start_response)
+
+
 class Base(DeclarativeBase):
     pass
 
 
 db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
+app.wsgi_app = HTTPMethodOverrideMiddleware(app.wsgi_app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todos.db"
 app.secret_key = os.environ['SECRET_KEY']
 db.init_app(app)
@@ -46,6 +71,11 @@ class TodoTask(db.Model):
 class TaskForm(FlaskForm):
     new_task = StringField(label="Enter a task:", validators=[input_required()], render_kw={"placeholder": "", "class": "form-control mb-3"})
     submit = SubmitField(label="Add Task", render_kw={"class": "btn btn-outline-dark"})
+
+
+class RenameForm(FlaskForm):
+    new_task = StringField(label="Enter a new name:", validators=[input_required()], render_kw={"placeholder": "", "class": "form-control mb-3"})
+    submit = SubmitField(label="Rename", render_kw={"class": "btn btn-outline-dark"})
 
 
 @app.route('/', methods=["GET", "POST"])
@@ -89,6 +119,20 @@ def list_page(list_id):
         db.session.add(new_task)
         db.session.commit()
     return render_template('list.html', form=form, todo_list=todo_list, todo_tasks=todo_tasks)
+
+
+@app.route('/rename/<list_id>', methods=["GET", "POST", "PATCH"])
+def rename(list_id):
+    form = RenameForm()
+    todo_list = db.session.execute(db.select(TodoList).where(TodoList.id == list_id)).scalar()
+    new_name = form.new_task.data
+    if form.validate_on_submit():
+        method = request.form.get('_method', '').upper()
+        if method in ['PATCH', 'DELETE']:
+            todo_list.list = new_name
+            db.session.commit()
+            return redirect(url_for('list_page', list_id=todo_list.id))
+    return render_template("rename.html", form=form, todo_list=todo_list)
 
 
 if __name__ == '__main__':

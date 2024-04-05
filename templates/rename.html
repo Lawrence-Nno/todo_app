@@ -23,13 +23,12 @@
         </div>
         <div class="row">
           <div class="col">
-            <a href="{{ url_for('index') }}" class="index-lists"><h2>Todo Lists</h2></a>
-              <p>{{ todo_list.list }}</p>
           </div>
           <div class="col-9">
-            <h2>Add a new task</h2>
+            <h2>Rename {{ todo_list.list }}</h2>
             <form method="POST">
               {{ form.hidden_tag() }}
+              <input type="hidden" name="_method" value="PATCH">
               <div class="form-text">{{ form.new_task.label }}</div>
               {{ form.new_task }}
               {{ form.submit }}

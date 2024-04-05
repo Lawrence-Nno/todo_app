@@ -26,7 +26,38 @@
             <h2>Todo Lists</h2>
             <ol>
             {% for todo_list in list_db %}
-              <li><a href="{{ url_for('list_page', list_id=todo_list.id) }}" class="index-lists">{{ todo_list.list }}</a></li>
+              <li>
+                <div id="{{ todo_list.id }}">
+                  <a href="{{ url_for('list_page', list_id=todo_list.id) }}" class="index-lists">{{ todo_list.list }}</a>
+                  <ul id="{{ todo_list.list }}" style="display: none;" class="dropdown-menu">
+                    <li class="dropdown-item"><a href="{{ url_for('rename', list_id=todo_list.id) }}" class="index-lists">Rename</a></li>
+                    <li class="dropdown-item"><a href="https://example.net" class="index-lists">Delete</a></li>
+                  </ul>
+                </div>
+                <script>
+                  const targetElement = document.getElementById("{{ todo_list.id }}");
+                  const linkList = document.getElementById("{{ todo_list.list }}");
+
+                  // Event listener to show link list on right-click
+                  targetElement.addEventListener('contextmenu', function(event) {
+                    event.preventDefault(); // Prevents the default context menu
+
+                    // Position the link list according to the mouse pointer
+                    linkList.style.left = event.pageX + 'px';
+                    linkList.style.top = event.pageY + 'px';
+
+                    // Display the link list
+                    linkList.style.display = 'block';
+                  });
+
+                  // Add event listener to hide link list when clicking outside
+                  document.addEventListener('click', function(event) {
+                    if (event.target !== targetElement && event.target !== linkList) {
+                      linkList.style.display = 'none';
+                    }
+                  });
+                </script>
+              </li>
             {% endfor %}
             </ol>
           </div>
