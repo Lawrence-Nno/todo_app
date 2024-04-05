@@ -27,21 +27,21 @@
               <p>{{ todo_list.list }}</p>
           </div>
           <div class="col-9">
-            <h2>Create a new list</h2>
+            <h2>Add a new task</h2>
             <form method="POST">
               {{ form.hidden_tag() }}
               <div class="form-text">{{ form.new_task.label }}</div>
               {{ form.new_task }}
               {{ form.submit }}
-              <br>
-              <br>
-              <br>
-              <ol>
-                {% for task in todo_task_list %}
-                <li>{{ task }}</li>
-                {% endfor %}
-              </ol>
             </form>
+            <br>
+            <br>
+            <br>
+            <ol>
+              {% for task in todo_tasks %}
+              <li>{{ task.task }}</li>
+              {% endfor %}
+            </ol>
           </div>
         </div>
       </div>

@@ -25,8 +25,8 @@
           <div class="col">
             <h2>Todo Lists</h2>
             <ol>
-            {% for list in todo_list %}
-              <li>list</li>
+            {% for todo_list in list_db %}
+              <li>{{ todo_list.list }}</li>
             {% endfor %}
             </ol>
           </div>
@@ -37,14 +37,6 @@
               <div class="form-text">{{ form.new_task.label }}</div>
               {{ form.new_task }}
               {{ form.submit }}
-              <br>
-              <br>
-              <br>
-              <ol>
-                {% for task in task_list %}
-                <li>{{ task }}</li>
-                {% endfor %}
-              </ol>
             </form>
           </div>
         </div>

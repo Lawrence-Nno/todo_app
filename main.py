@@ -3,9 +3,10 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import input_required
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, Integer
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import ForeignKey
 from datetime import datetime
+import os
 
 
 class Base(DeclarativeBase):
@@ -15,14 +16,21 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todos.db"
-app.secret_key = "ANy_String!"
+app.secret_key = os.environ['SECRET_KEY']
 db.init_app(app)
 
 
-class Todo(db.Model):
+class TodoList(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     list: Mapped[str] = mapped_column(unique=True)
+    todo_tasks: Mapped[str] = relationship("TodoTask", back_populates="todolist")
+
+
+class TodoTask(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
     task: Mapped[str]
+    todolist: Mapped[str] = relationship("TodoList", back_populates="todo_tasks")
+    todolist_id: Mapped[str] = mapped_column(ForeignKey("todo_list.id"))
 
 
 # class User(db.Model):
@@ -43,30 +51,44 @@ class TaskForm(FlaskForm):
 @app.route('/', methods=["GET", "POST"])
 def index():
     form = TaskForm()
-    todos = db.session.execute(db.select(Todo).order_by(Todo.id)).scalars
+    list_db = db.session.execute(db.select(TodoList).order_by(TodoList.id)).scalars()
+    task_db = db.session.execute(db.select(TodoTask).order_by(TodoTask.id)).scalars()
     if request.method == "POST":
         current_time = datetime.now()
         time = current_time.strftime("%Y-%m-%d_%H:%M:%S:%f")
-        new_list = "List_" + time
-        new_task = form.new_task.data + "|"
-        new_todo = Todo(
-            list=new_list,
-            task=new_task
+        list_name = "List_" + time
+        task_data = form.new_task.data
+        new_list = TodoList(
+            list=list_name
         )
-        db.session.add(new_todo)
+        db.session.add(new_list)
         db.session.commit()
-        return redirect(url_for('list_page', list_id=new_todo.id))
-    return render_template('index.html', form=form, todos=todos)
+        new_task = TodoTask(
+            task=task_data,
+            todolist_id=new_list.id
+        )
+        db.session.add(new_task)
+        db.session.commit()
+        return redirect(url_for('list_page', list_id=new_list.id))
+    return render_template('index.html', form=form, list_db=list_db)
 
 
-@app.route('/list/<todo_id>', methods=["GET", "POST"])
-def list_page(todo_id):
+@app.route('/list/<list_id>', methods=["GET", "POST"])
+def list_page(list_id):
     form = TaskForm()
-    todos = db.session.execute(db.select(Todo).order_by(Todo.id)).scalars()
-    todo_list = db.session.execute(db.select(Todo).where(Todo.id == todo_id)).scalar()
-    todo_task_string = todo_list.task
-    todo_task_list = todo_task_string.split('|')
-    return render_template('list.html', form=form, todos=todos, todo_list=todo_list, todo_task_list=todo_task_list)
+    # list_db = db.session.execute(db.select(TodoList).order_by(TodoList.id)).scalars()
+    # task_db = db.session.execute(db.select(TodoTask).order_by(TodoTask.id)).scalars()
+    todo_list = db.session.execute(db.select(TodoList).where(TodoList.id == list_id)).scalar()
+    todo_tasks = db.session.query(TodoTask).filter_by(todolist_id=list_id)
+    task_data = form.new_task.data
+    if form.validate_on_submit():
+        new_task = TodoTask(
+            task=task_data,
+            todolist_id=list_id
+        )
+        db.session.add(new_task)
+        db.session.commit()
+    return render_template('list.html', form=form, todo_list=todo_list, todo_tasks=todo_tasks)
 
 
 if __name__ == '__main__':
