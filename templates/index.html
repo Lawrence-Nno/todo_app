@@ -26,7 +26,7 @@
             <h2>Todo Lists</h2>
             <ol>
             {% for todo_list in list_db %}
-              <li>{{ todo_list.list }}</li>
+              <li><a href="{{ url_for('list_page', list_id=todo_list.id) }}" class="index-lists">{{ todo_list.list }}</a></li>
             {% endfor %}
             </ol>
           </div>

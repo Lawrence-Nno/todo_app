@@ -55,7 +55,7 @@ def index():
     task_db = db.session.execute(db.select(TodoTask).order_by(TodoTask.id)).scalars()
     if request.method == "POST":
         current_time = datetime.now()
-        time = current_time.strftime("%Y-%m-%d_%H:%M:%S:%f")
+        time = current_time.strftime("%Y-%m-%d_%H:%M:%S")
         list_name = "List_" + time
         task_data = form.new_task.data
         new_list = TodoList(

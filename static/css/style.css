@@ -100,3 +100,7 @@ h1{
 .form-text{
     margin-bottom: 0.5rem;
 }
+.index-lists{
+    text-decoration: None;
+    color: black;
+}
