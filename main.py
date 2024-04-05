@@ -59,16 +59,14 @@ def index():
     return render_template('index.html', form=form, todos=todos)
 
 
-@app.route('/list/<list_id>', methods=["GET", "POST"])
-def list_page(list_id):
+@app.route('/list/<todo_id>', methods=["GET", "POST"])
+def list_page(todo_id):
     form = TaskForm()
     todos = db.session.execute(db.select(Todo).order_by(Todo.id)).scalars()
-    todo_list = db.session.execute(db.select(Todo).where(Todo.id == list_id)).scalar()
-    task_string = todo_list.task
-    task_list = task_string.split('|')
-    print(task_string)
-    print(task_list)
-    return render_template('list.html', form=form, todos=todos, todo_list=todo_list, task_list=task_list)
+    todo_list = db.session.execute(db.select(Todo).where(Todo.id == todo_id)).scalar()
+    todo_task_string = todo_list.task
+    todo_task_list = todo_task_string.split('|')
+    return render_template('list.html', form=form, todos=todos, todo_list=todo_list, todo_task_list=todo_task_list)
 
 
 if __name__ == '__main__':
