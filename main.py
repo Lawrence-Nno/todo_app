@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import input_required
@@ -78,6 +78,11 @@ class RenameForm(FlaskForm):
     submit = SubmitField(label="Rename", render_kw={"class": "btn btn-outline-dark"})
 
 
+class DeleteForm(FlaskForm):
+    delete_key = StringField(label="Enter the name of the list you wish to delete to proceed:", validators=[input_required()], render_kw={"placeholder": "", "class": "form-control mb-3"})
+    submit = SubmitField(label="Delete", render_kw={"class": "btn btn-outline-danger"})
+
+
 @app.route('/', methods=["GET", "POST"])
 def index():
     form = TaskForm()
@@ -133,6 +138,29 @@ def rename(list_id):
             db.session.commit()
             return redirect(url_for('list_page', list_id=todo_list.id))
     return render_template("rename.html", form=form, todo_list=todo_list)
+
+
+@app.route('/delete/<list_id>', methods=["GET", "POST", "DELETE"])
+def delete_list(list_id):
+    form = DeleteForm()
+    todo_list = db.session.execute(db.select(TodoList).where(TodoList.id == list_id)).scalar()
+    todo_tasks = db.session.query(TodoTask).filter_by(todolist_id=list_id)
+    delete_key = form.delete_key.data
+    if form.validate_on_submit():
+        method = request.form.get('_method', '').upper()
+        if method in ['PATCH', 'DELETE']:
+            if delete_key == todo_list.list:
+                db.session.delete(todo_list)
+                db.session.commit()
+                flash(f"You successfully deleted {todo_list.list}", "success")
+                return redirect(url_for('index'))
+            else:
+                flash(f"Delete Unsuccessful, the name entered didn't match", "failure")
+                return redirect(url_for('index'))
+        else:
+            flash("WRONG METHOD")
+            return redirect(url_for('index'))
+    return render_template('delete.html', form=form, todo_list=todo_list, todo_tasks=todo_tasks)
 
 
 if __name__ == '__main__':

@@ -104,3 +104,11 @@ h1{
     text-decoration: None;
     color: black;
 }
+.main-link{
+    text-decoration: None;
+    color: black;
+}
+.edit-button{
+    border: none;
+    padding: 0;
+}
