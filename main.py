@@ -62,6 +62,7 @@ class TodoTask(db.Model):
 #     id: Mapped[int] = mapped_column(primary_key=True)
 #     email: Mapped[str] = mapped_column(unique=True)
 #     username: Mapped[str] = mapped_column(unique=True)
+#     password: Mapped[str] =
 
 
 # with app.app_context():
@@ -150,6 +151,9 @@ def delete_list(list_id):
         method = request.form.get('_method', '').upper()
         if method in ['PATCH', 'DELETE']:
             if delete_key == todo_list.list:
+                for task in todo_tasks:
+                    db.session.delete(task)
+                    db.session.commit()
                 db.session.delete(todo_list)
                 db.session.commit()
                 flash(f"You successfully deleted {todo_list.list}", "success")
@@ -161,6 +165,37 @@ def delete_list(list_id):
             flash("WRONG METHOD")
             return redirect(url_for('index'))
     return render_template('delete.html', form=form, todo_list=todo_list, todo_tasks=todo_tasks)
+
+
+@app.route('/task/edit/<task_id>', methods=["GET", "POST", "PATCH"])
+def task_rename(task_id):
+    form = RenameForm()
+    form.new_task.label.text = "Enter your new task here:"
+    todo_task = db.session.execute(db.select(TodoTask).where(TodoTask.id == task_id)).scalar()
+    task_newname = form.new_task.data
+    if form.validate_on_submit():
+        method = request.form.get('_method', '').upper()
+        if method in ['PATCH', 'DELETE']:
+            todo_task.task = task_newname
+            db.session.commit()
+            return redirect(url_for('list_page', list_id=todo_task.todolist_id))
+    return render_template('task_rename.html', form=form, todo_task=todo_task)
+
+
+@app.route('/task/delete/<task_id>', methods=["GET", "POST", "DELETE"])
+def task_delete(task_id):
+    form = RenameForm()
+    form.new_task.label.text = "Enter your new task here:"
+    form.submit.label.text = "Delete"
+    form.new_task.validators = None
+    todo_task = db.session.execute(db.select(TodoTask).where(TodoTask.id == task_id)).scalar()
+    if request.method == "POST":
+        method = request.form.get('_method', '').upper()
+        if method in ['PATCH', 'DELETE']:
+            db.session.delete(todo_task)
+            db.session.commit()
+            return redirect(url_for('list_page', list_id=todo_task.todolist_id))
+    return render_template('task_delete.html', form=form, todo_task=todo_task)
 
 
 if __name__ == '__main__':

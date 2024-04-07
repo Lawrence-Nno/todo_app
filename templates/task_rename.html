@@ -15,7 +15,6 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col">
-
           </div>
           <div class="col-9">
             <a href="{{ url_for('index') }}" class="index-lists"><h1 class="todoapp">Todo App</h1></a>
@@ -25,21 +24,17 @@
           <div class="col">
           </div>
           <div class="col-9">
-            <h2>Delete {{ todo_list.list }}?</h2>
+            <h2>Edit {{ todo_task.task }}</h2>
             <form method="POST">
               {{ form.hidden_tag() }}
-              <input type="hidden" name="_method" value="DELETE">
-              <div class="form-text">{{ form.delete_key.label }}</div>
-              {{ form.delete_key }}
+              <input type="hidden" name="_method" value="PATCH">
+              <div class="form-text">{{ form.new_task.label }}</div>
+              {{ form.new_task }}
               {{ form.submit }}
             </form>
             <br>
             <br>
-            <ol>
-              {% for task in todo_tasks %}
-              <li>{{ task.task }}</li>
-              {% endfor %}
-            </ol>
+            <p>{{ todo_task.task }}</p>
           </div>
         </div>
       </div>
@@ -47,5 +42,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
   </body>
 </html>

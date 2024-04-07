@@ -18,7 +18,7 @@
 
           </div>
           <div class="col-9">
-            <h1 class="todoapp">Todo App</h1>
+            <a href="{{ url_for('index') }}" class="index-lists"><h1 class="todoapp">Todo App</h1></a>
           </div>
         </div>
         <div class="row">
@@ -27,10 +27,10 @@
             <ol class="itemList">
             {% for todo_list in list_db %}
               <li class="link-item">
-                <a href="{{ url_for('list_page', list_id=todo_list.id) }}" class="main-link" >{{ todo_list.list }}</a>
+                <a href="{{ url_for('list_page', list_id=todo_list.id) }}" class="main-link">{{ todo_list.list }}</a>
                 <ul style="display: none;" class="dropdown-menu edit-links">
                  <li class="dropdown-item"><a href="{{ url_for('rename', list_id=todo_list.id) }}" class="index-lists">Rename</a></li>
-                 <li class="dropdown-item"><a href="#" class="index-lists">Delete</a></li>
+                 <li class="dropdown-item"><a href="{{ url_for('delete_list', list_id=todo_list.id) }}" class="index-lists">Delete</a></li>
                 </ul>
               </li>
             {% endfor %}
