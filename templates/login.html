@@ -11,18 +11,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-      <a class="nav-link active" aria-current="page" href="{{ url_for('index') }}">Home</a>
-      <div class="ms-auto">
-      {% if not logged_in: %}
-      <a class="nav-link active" aria-current="page" href="{{ url_for('login') }}">Log in</a>
-      {% else: %}
-      <a class="nav-link active" aria-current="page" href="{{ url_for('logout') }}">Log out</a>
-      {% endif %}
-      </div>
-    </div>
-  </nav>
     <div class="container-fluid">
       <div class="container-fluid">
         <div class="row">
@@ -30,9 +18,8 @@
           </div>
             <div class="col-9">
               <a href="{{ url_for('index') }}" class="index-lists"><h1 class="todoapp">Todo App</h1></a>
-              <div class="welcome-msg">Welcome {{ current_user.username }}! What are you doing today?</div>
               {% for message in get_flashed_messages()  %}
-              <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               </div>
@@ -41,31 +28,19 @@
         </div>
         <div class="row">
           <div class="col">
-            <h2>Todo Lists</h2>
-            {% if logged_in: %}
-            <ol class="itemList">
-            {% for todo_list in list_db %}
-              <li class="link-item">
-                <a href="{{ url_for('list_page', list_id=todo_list.id) }}" class="main-link">{{ todo_list.list }}</a>
-                <ul style="display: none;" class="dropdown-menu edit-links">
-                 <li class="dropdown-item"><a href="{{ url_for('rename', list_id=todo_list.id) }}" class="index-lists">Rename</a></li>
-                 <li class="dropdown-item"><a href="{{ url_for('delete_list', list_id=todo_list.id) }}" class="index-lists">Delete</a></li>
-                </ul>
-              </li>
-            {% endfor %}
-            </ol>
-            {% endif %}
+            <h2></h2>
           </div>
-          <script>
-
-          </script>
           <div class="col-9">
-            <h2>Create a new list</h2>
+            <h2 class="login-register">Login</h2>
             <form method="POST">
-              {{ form.hidden_tag() }}
-              <div class="form-text">{{ form.new_task.label }}</div>
-              {{ form.new_task }}
-              {{ form.submit }}
+              {{ form_login.hidden_tag() }}
+              <div class="form-text">{{ form_login.email.label }}</div>
+              {{ form_login.email }}
+              <div class="form-text">{{ form_login.username.label }}</div>
+              {{ form_login.username }}
+              <div class="form-text">{{ form_login.password.label }}</div>
+              {{ form_login.password }}
+              {{ form_login.submit }}
             </form>
           </div>
         </div>

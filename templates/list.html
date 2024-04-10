@@ -11,15 +11,33 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   </head>
   <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="nav-link active" aria-current="page" href="#">Home</a>
+        <div class="ms-auto">
+        {% if not logged_in: %}
+        <a class="nav-link active" aria-current="page" href="{{ url_for('login') }}">Log in</a>
+        {% else: %}
+        <a class="nav-link active" aria-current="page" href="{{ url_for('logout') }}">Log out</a>
+        {% endif %}
+        </div>
+      </div>
+    </nav>
     <div class="container-fluid">
       <div class="container-fluid">
         <div class="row">
           <div class="col">
-
           </div>
-          <div class="col-9">
-            <a href="{{ url_for('index') }}" class="index-lists"><h1 class="todoapp">Todo App</h1></a>
-          </div>
+            <div class="col-9">
+              <a href="{{ url_for('index') }}" class="index-lists"><h1 class="todoapp">Todo App</h1></a>
+              <div class="welcome-msg">Hi {{ current_user.username }}! Add your todo tasks below</div>
+              {% for message in get_flashed_messages()  %}
+              <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+              {% endfor %}
+            </div>
         </div>
         <div class="row">
           <div class="col">
@@ -36,17 +54,22 @@
             </form>
             <br>
             <br>
-            <ol class="itemList">
-              {% for task in todo_tasks %}
-              <li class="link-item">
-                <a href="#" class="main-link">{{ task.task }}</a>
-                <ul style="display: none;" class="dropdown-menu edit-links">
-                  <li class="dropdown-item"><a href="{{ url_for('task_rename', task_id=task.id) }}" class="index-lists">Rename</a></li>
-                  <li class="dropdown-item"><a href="{{ url_for('task_delete', task_id=task.id) }}" class="index-lists">Delete</a></li>
-                </ul>
-              </li>
-              {% endfor %}
-            </ol>
+            <div class="tasklist-div">
+              <ol class="itemList">
+                {% for task in todo_tasks %}
+                <li class="link-item task-link">
+                  <a id="{{ task.id }}" href="#" class="main-link taskText">{{ task.task }}</a>
+                  <div class="done-div">
+                    <input id="checkbox{{ task.id }}" class="check" type="checkbox" name="done">
+                  </div>
+                  <ul style="display: none;" class="dropdown-menu edit-links">
+                    <li class="dropdown-item"><a href="{{ url_for('task_rename', task_id=task.id) }}" class="index-lists">Rename</a></li>
+                    <li class="dropdown-item"><a href="{{ url_for('task_delete', task_id=task.id) }}" class="index-lists">Delete</a></li>
+                  </ul>
+                </li>
+                {% endfor %}
+              </ol>
+           </div>
           </div>
         </div>
       </div>

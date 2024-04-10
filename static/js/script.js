@@ -18,3 +18,26 @@ document.addEventListener('click', function(event) {
     }
 });
 });
+
+// Checkbox javascript to change color of task text
+// Get the checkbox and text element
+const taskTexts = document.querySelectorAll('.taskText');
+const checkboxes = document.querySelectorAll('.check');
+
+checkboxes.forEach((checkbox, id) => {
+    // Add event listener to the checkbox
+    checkbox.addEventListener('change', function() {
+        // Toggle the 'checked' class on the corresponding anchor element
+        taskTexts[id].classList.toggle('checked', checkbox.checked);
+    });
+});
+
+
+// JavaScript functions to show/hide the pop-up form
+function openForm() {
+    document.getElementById("loginForm").style.display = "block";
+}
+
+function closeForm() {
+    document.getElementById("loginForm").style.display = "none";
+}

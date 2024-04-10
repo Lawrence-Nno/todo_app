@@ -90,7 +90,16 @@ h1{
     font-weight: 700;
 }
 .todoapp{
-    margin: 3rem 0;
+    margin: 3rem 0 0 0;
+}
+.welcome-msg{
+    margin-bottom: 3rem;
+    margin-top: .25rem;
+    font-size: .875em;
+    color: var(--bs-secondary-color);
+}
+.login-register{
+    margin-top: 3rem;
 }
 .form-control{
     width: 70%;
@@ -99,6 +108,9 @@ h1{
 }
 .form-text{
     margin-bottom: 0.5rem;
+}
+.alert{
+    width: 70%;
 }
 .index-lists{
     text-decoration: None;
@@ -111,4 +123,31 @@ h1{
 .edit-button{
     border: none;
     padding: 0;
+}
+.done-div{
+    display: inline;
+}
+.check{
+    width: 1.5rem;
+    height: 1.5rem;
+    float: right;
+    margin-right: 17rem;
+    accent-color: green;
+}
+.check:checked:{
+    width: 1.5rem;
+    height: 1.5rem;
+    float: right;
+    margin-right: 17rem;
+    color: green;
+}
+.link-item{
+    font-size: 1rem;
+}
+.task-link{
+    font-size: 1.2rem;
+}
+.checked{
+    color: #DDDDDD;
+    text-decoration: line-through;
 }

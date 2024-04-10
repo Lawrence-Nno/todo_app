@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, EmailField, PasswordField
 from wtforms.validators import input_required
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
 
@@ -37,18 +39,22 @@ class Base(DeclarativeBase):
     pass
 
 
+login_manager = LoginManager()
 db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 app.wsgi_app = HTTPMethodOverrideMiddleware(app.wsgi_app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todos.db"
 app.secret_key = os.environ['SECRET_KEY']
 db.init_app(app)
+login_manager.init_app(app)
 
 
 class TodoList(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     list: Mapped[str] = mapped_column(unique=True)
     todo_tasks: Mapped[str] = relationship("TodoTask", back_populates="todolist")
+    list_user: Mapped[str] = relationship("User", back_populates="user_list")
+    list_user_id: Mapped[str] = mapped_column(ForeignKey("user.id"))
 
 
 class TodoTask(db.Model):
@@ -58,11 +64,12 @@ class TodoTask(db.Model):
     todolist_id: Mapped[str] = mapped_column(ForeignKey("todo_list.id"))
 
 
-# class User(db.Model):
-#     id: Mapped[int] = mapped_column(primary_key=True)
-#     email: Mapped[str] = mapped_column(unique=True)
-#     username: Mapped[str] = mapped_column(unique=True)
-#     password: Mapped[str] =
+class User(db.Model, UserMixin):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(unique=True)
+    username: Mapped[str] = mapped_column(unique=True)
+    password: Mapped[str]
+    user_list: Mapped[str] = relationship("TodoList", back_populates="list_user")
 
 
 # with app.app_context():
@@ -79,34 +86,93 @@ class RenameForm(FlaskForm):
     submit = SubmitField(label="Rename", render_kw={"class": "btn btn-outline-dark"})
 
 
+class LoginForm(FlaskForm):
+    email = EmailField(label="Enter your email:", validators=[input_required()], render_kw={"placeholder": "Email", "class": "form-control mb-3"})
+    username = StringField(label="Enter your first name:", validators=[input_required()], render_kw={"placeholder": "First Name", "class": "form-control mb-3"})
+    password = PasswordField(label="Enter your password:", validators=[input_required()], render_kw={"placeholder": "Password", "class": "form-control mb-3"})
+    submit = SubmitField(label="sign in", render_kw={"class": "btn btn-outline-dark"})
+
+
+class LogoutForm(FlaskForm):
+    submit = SubmitField(label="log out")
+
+
 class DeleteForm(FlaskForm):
     delete_key = StringField(label="Enter the name of the list you wish to delete to proceed:", validators=[input_required()], render_kw={"placeholder": "", "class": "form-control mb-3"})
     submit = SubmitField(label="Delete", render_kw={"class": "btn btn-outline-danger"})
 
 
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.execute(db.select(User).where(User.id == user_id)).scalar()
+
+
 @app.route('/', methods=["GET", "POST"])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+    else:
+        form_login = LoginForm()
+        if form_login.validate_on_submit():
+            user = db.session.execute(db.select(User).where(User.email == form_login.email.data)).scalar()
+            if user:
+                if check_password_hash(user.password, form_login.password.data):
+                    login_user(user)
+                    return redirect(url_for("index"))
+                else:
+                    flash("You entered the wrong password", "failure")
+                    return redirect(url_for("login"))
+            else:
+                flash("We don't have a user with that email address, register instead", "failure")
+                return redirect(url_for("register"))
+        return render_template("login.html", form_login=form_login)
+
+
+@app.route('/register', methods=["GET", "POST"])
+def register():
+    form = LoginForm()
+    form.submit.label.text = "register"
+    if form.validate_on_submit():
+        hashed_pass = generate_password_hash(form.password.data, method="pbkdf2:sha256", salt_length=8)
+        new_user = User(
+            email=form.email.data,
+            username=form.username.data,
+            password=hashed_pass
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        login_user(new_user)
+        return redirect(url_for("index"))
+    return render_template("register.html", form=form)
+
+
+@app.route('/home', methods=["GET", "POST"])
 def index():
     form = TaskForm()
-    list_db = db.session.execute(db.select(TodoList).order_by(TodoList.id)).scalars()
+    user = db.session.execute(db.select(User).where(User.id == current_user.id)).scalar()
+    list_db = db.session.execute(db.select(TodoList).where(TodoList.list_user_id == user.id)).scalars()
     task_db = db.session.execute(db.select(TodoTask).order_by(TodoTask.id)).scalars()
     if request.method == "POST":
         current_time = datetime.now()
         time = current_time.strftime("%Y-%m-%d_%H:%M:%S")
         list_name = "List_" + time
         task_data = form.new_task.data
+
         new_list = TodoList(
-            list=list_name
+            list=list_name,
+            list_user_id=user.id
         )
         db.session.add(new_list)
         db.session.commit()
+
         new_task = TodoTask(
             task=task_data,
             todolist_id=new_list.id
         )
         db.session.add(new_task)
         db.session.commit()
-        return redirect(url_for('list_page', list_id=new_list.id))
-    return render_template('index.html', form=form, list_db=list_db)
+        return redirect(url_for("list_page", list_id=new_list.id))
+    return render_template('index.html', list_db=list_db, form=form, logged_in=current_user.is_authenticated)
 
 
 @app.route('/list/<list_id>', methods=["GET", "POST"])
@@ -196,6 +262,12 @@ def task_delete(task_id):
             db.session.commit()
             return redirect(url_for('list_page', list_id=todo_task.todolist_id))
     return render_template('task_delete.html', form=form, todo_task=todo_task)
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
 
 
 if __name__ == '__main__':
