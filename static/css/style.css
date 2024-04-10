@@ -151,8 +151,99 @@ h1{
     color: #DDDDDD;
     text-decoration: line-through;
 }
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 700px) {
+  .todoapp{
+    margin: 2rem 0 0 0;
+  }
+  .task-link{
+    font-size: 1rem;
+  }
+  .link-item{
+    font-size: 0.8rem;
+    margin-left: -0.7rem;
+  }
+  h2{
+    font-size: 1.5rem;
+  }
+  .form-control{
+  font-size: 0.8rem;
+  }
+  .btn{
+    font-size: 0.8rem;
+  }
+  .check{
+    width: 1rem;
+    height: 1rem;
+    float: right;
+    margin-right: 5rem;
+    accent-color: green;
+}
+.check:checked:{
+    width: 1rem;
+    height: 1rem;
+    float: right;
+    margin-right: 5rem;
+    color: green;
+}
+}
+@media only screen and (max-width: 500px) {
   body {
     background-color: lightblue;
+  }
+  .todoapp{
+    margin: 2rem 0 0 0;
+  }
+  .task-link{
+    font-size: 1rem;
+  }
+  .link-item{
+    font-size: 0.8rem;
+    margin-left: -0.7rem;
+  }
+  h2{
+    font-size: 1rem;
+  }
+  .form-control{
+  font-size: 0.8rem;
+  }
+  .btn{
+    font-size: 0.8rem;
+  }
+  .alert{
+    width: 100%;
+  }
+  .form-control{
+    width: 100%;
+    background-color: #EEEEEE;
+    border: None;
+  }
+  .mobile-des{
+    margin-left: 3rem;
+  }
+  .mobile-todo{
+    margin-right: 3rem;
+  }
+  .welcome-msg{
+    margin-bottom: 1.5rem;
+    margin-top: .25rem;
+    font-size: .7rem;
+    color: var(--bs-secondary-color);
+  }
+  .login-mob{
+    margin-right: 5rem;
+  }
+  .check{
+    width: 1rem;
+    height: 1rem;
+    float: right;
+    margin-right: 2rem;
+    accent-color: green;
+  }
+.check:checked:{
+    width: 1rem;
+    height: 1rem;
+    float: right;
+    margin-right: 2rem;
+    color: green;
   }
 }

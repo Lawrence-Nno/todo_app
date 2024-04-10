@@ -147,6 +147,7 @@ def register():
 
 
 @app.route('/home', methods=["GET", "POST"])
+@login_required
 def index():
     form = TaskForm()
     user = db.session.execute(db.select(User).where(User.id == current_user.id)).scalar()
@@ -176,6 +177,7 @@ def index():
 
 
 @app.route('/list/<list_id>', methods=["GET", "POST"])
+@login_required
 def list_page(list_id):
     form = TaskForm()
     # list_db = db.session.execute(db.select(TodoList).order_by(TodoList.id)).scalars()
@@ -194,6 +196,7 @@ def list_page(list_id):
 
 
 @app.route('/rename/<list_id>', methods=["GET", "POST", "PATCH"])
+@login_required
 def rename(list_id):
     form = RenameForm()
     todo_list = db.session.execute(db.select(TodoList).where(TodoList.id == list_id)).scalar()
@@ -208,6 +211,7 @@ def rename(list_id):
 
 
 @app.route('/delete/<list_id>', methods=["GET", "POST", "DELETE"])
+@login_required
 def delete_list(list_id):
     form = DeleteForm()
     todo_list = db.session.execute(db.select(TodoList).where(TodoList.id == list_id)).scalar()
@@ -234,6 +238,7 @@ def delete_list(list_id):
 
 
 @app.route('/task/edit/<task_id>', methods=["GET", "POST", "PATCH"])
+@login_required
 def task_rename(task_id):
     form = RenameForm()
     form.new_task.label.text = "Enter your new task here:"
@@ -249,6 +254,7 @@ def task_rename(task_id):
 
 
 @app.route('/task/delete/<task_id>', methods=["GET", "POST", "DELETE"])
+@login_required
 def task_delete(task_id):
     form = RenameForm()
     form.new_task.label.text = "Enter your new task here:"
@@ -265,6 +271,7 @@ def task_delete(task_id):
 
 
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for("login"))
