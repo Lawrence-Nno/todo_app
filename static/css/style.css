@@ -85,7 +85,7 @@
 body{
     font-family: "IBM Plex Sans", sans-serif;
     position: relative;
-    min-height: 100vh;
+    height: 100vh;
     color: #76ABAE;
 }
 
