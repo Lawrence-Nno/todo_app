@@ -47,6 +47,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todos.db"
 app.secret_key = os.environ['SECRET_KEY']
 db.init_app(app)
 login_manager.init_app(app)
+footer_time = datetime.now()
+footer_time = footer_time.strftime("%Y")
 
 
 class TodoList(db.Model):
@@ -78,19 +80,19 @@ class User(db.Model, UserMixin):
 
 class TaskForm(FlaskForm):
     new_task = StringField(label="Enter a task:", validators=[input_required()], render_kw={"placeholder": "", "class": "form-control mb-3"})
-    submit = SubmitField(label="Add Task", render_kw={"class": "btn btn-outline-dark"})
+    submit = SubmitField(label="Add Task", render_kw={"class": "btn btn-outline-success"})
 
 
 class RenameForm(FlaskForm):
-    new_task = StringField(label="Enter a new name:", validators=[input_required()], render_kw={"placeholder": "", "class": "form-control mb-3"})
-    submit = SubmitField(label="Rename", render_kw={"class": "btn btn-outline-dark"})
+    new_task = StringField(label="Enter a new name:", validators=[input_required()], render_kw={"placeholder": "", "class": "form-control mb-3 mx-auto"})
+    submit = SubmitField(label="Rename", render_kw={"class": "btn btn-outline-success"})
 
 
 class LoginForm(FlaskForm):
     email = EmailField(label="Enter your email:", validators=[input_required()], render_kw={"placeholder": "Email", "class": "form-control mb-3"})
     username = StringField(label="Enter your first name:", validators=[input_required()], render_kw={"placeholder": "First Name", "class": "form-control mb-3"})
     password = PasswordField(label="Enter your password:", validators=[input_required()], render_kw={"placeholder": "Password", "class": "form-control mb-3"})
-    submit = SubmitField(label="sign in", render_kw={"class": "btn btn-outline-dark"})
+    submit = SubmitField(label="sign in", render_kw={"class": "btn btn-outline-success"})
 
 
 class LogoutForm(FlaskForm):
@@ -98,7 +100,7 @@ class LogoutForm(FlaskForm):
 
 
 class DeleteForm(FlaskForm):
-    delete_key = StringField(label="Enter the name of the list you wish to delete to proceed:", validators=[input_required()], render_kw={"placeholder": "", "class": "form-control mb-3"})
+    delete_key = StringField(label="Enter the name of the list you wish to delete to proceed:", validators=[input_required()], render_kw={"placeholder": "", "class": "form-control mb-3 mx-auto"})
     submit = SubmitField(label="Delete", render_kw={"class": "btn btn-outline-danger"})
 
 
@@ -123,9 +125,9 @@ def login():
                     flash("You entered the wrong password", "failure")
                     return redirect(url_for("login"))
             else:
-                flash("We don't have a user with that email address, register instead", "failure")
+                flash("It seems you haven't registered, please do.", "failure")
                 return redirect(url_for("register"))
-        return render_template("login.html", form_login=form_login)
+        return render_template("login.html", form_login=form_login, footer_time=footer_time)
 
 
 @app.route('/register', methods=["GET", "POST"])
@@ -143,7 +145,7 @@ def register():
         db.session.commit()
         login_user(new_user)
         return redirect(url_for("index"))
-    return render_template("register.html", form=form)
+    return render_template("register.html", form=form, footer_time=footer_time)
 
 
 @app.route('/home', methods=["GET", "POST"])
@@ -156,7 +158,7 @@ def index():
     if request.method == "POST":
         current_time = datetime.now()
         time = current_time.strftime("%a-%H:%M:%S")
-        list_name = "List-" + time
+        list_name = time
         task_data = form.new_task.data
 
         new_list = TodoList(
@@ -173,7 +175,7 @@ def index():
         db.session.add(new_task)
         db.session.commit()
         return redirect(url_for("list_page", list_id=new_list.id))
-    return render_template('index.html', list_db=list_db, form=form, logged_in=current_user.is_authenticated)
+    return render_template('index.html', list_db=list_db, form=form, logged_in=current_user.is_authenticated, footer_time=footer_time)
 
 
 @app.route('/list/<list_id>', methods=["GET", "POST"])
@@ -192,7 +194,7 @@ def list_page(list_id):
         )
         db.session.add(new_task)
         db.session.commit()
-    return render_template('list.html', form=form, todo_list=todo_list, todo_tasks=todo_tasks)
+    return render_template('list.html', form=form, todo_list=todo_list, todo_tasks=todo_tasks, logged_in=current_user.is_authenticated, footer_time=footer_time)
 
 
 @app.route('/rename/<list_id>', methods=["GET", "POST", "PATCH"])
@@ -207,7 +209,7 @@ def rename(list_id):
             todo_list.list = new_name
             db.session.commit()
             return redirect(url_for('list_page', list_id=todo_list.id))
-    return render_template("rename.html", form=form, todo_list=todo_list)
+    return render_template("rename.html", form=form, todo_list=todo_list, logged_in=current_user.is_authenticated, footer_time=footer_time)
 
 
 @app.route('/delete/<list_id>', methods=["GET", "POST", "DELETE"])
@@ -234,7 +236,7 @@ def delete_list(list_id):
         else:
             flash("WRONG METHOD")
             return redirect(url_for('index'))
-    return render_template('delete.html', form=form, todo_list=todo_list, todo_tasks=todo_tasks)
+    return render_template('delete.html', form=form, todo_list=todo_list, todo_tasks=todo_tasks, logged_in=current_user.is_authenticated, footer_time=footer_time)
 
 
 @app.route('/task/edit/<task_id>', methods=["GET", "POST", "PATCH"])
@@ -250,7 +252,7 @@ def task_rename(task_id):
             todo_task.task = task_newname
             db.session.commit()
             return redirect(url_for('list_page', list_id=todo_task.todolist_id))
-    return render_template('task_rename.html', form=form, todo_task=todo_task)
+    return render_template('task_rename.html', form=form, todo_task=todo_task, logged_in=current_user.is_authenticated, footer_time=footer_time)
 
 
 @app.route('/task/delete/<task_id>', methods=["GET", "POST", "DELETE"])
@@ -267,7 +269,7 @@ def task_delete(task_id):
             db.session.delete(todo_task)
             db.session.commit()
             return redirect(url_for('list_page', list_id=todo_task.todolist_id))
-    return render_template('task_delete.html', form=form, todo_task=todo_task)
+    return render_template('task_delete.html', form=form, todo_task=todo_task, logged_in=current_user.is_authenticated, footer_time=footer_time)
 
 
 @app.route('/logout')

@@ -83,7 +83,10 @@
 }
 
 body{
-font-family: "IBM Plex Sans", sans-serif;
+    font-family: "IBM Plex Sans", sans-serif;
+    position: relative;
+    min-height: 100vh;
+    color: #76ABAE;
 }
 
 h1{
@@ -106,6 +109,18 @@ h1{
     background-color: #EEEEEE;
     border: None;
 }
+.form-control::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+            color: #76ABAE;
+            opacity: 1; /* Firefox */
+}
+
+.form-control:-ms-input-placeholder { /* Internet Explorer 10-11 */
+            color: #76ABAE;
+}
+
+.form-control::-ms-input-placeholder { /* Microsoft Edge */
+            color: #76ABAE;
+ }
 .form-text{
     margin-bottom: 0.5rem;
 }
@@ -114,11 +129,11 @@ h1{
 }
 .index-lists{
     text-decoration: None;
-    color: black;
+    color: #76ABAE;
 }
 .main-link{
     text-decoration: None;
-    color: black;
+    color: #76ABAE;
 }
 .edit-button{
     border: none;
@@ -151,6 +166,29 @@ h1{
     color: #DDDDDD;
     text-decoration: line-through;
 }
+.rename-list{
+    margin-top: 2rem;
+}
+.list-num{
+    list-style-position: inside;
+}
+.footer{
+    background-color: #76ABAE;
+    color: white;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+.footer-text{
+    padding: 1rem;
+    font-size: 1rem;
+}
+.footer-link{
+    text-decoration: none;
+    color: white;
+}
+
+
 @media only screen and (max-width: 700px) {
   .todoapp{
     margin: 2rem 0 0 0;
@@ -159,8 +197,12 @@ h1{
     font-size: 1rem;
   }
   .link-item{
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     margin-left: -0.7rem;
+  }
+  .list-list{
+    font-size: 0.7rem;
+    font-weight: 500;
   }
   h2{
     font-size: 1.5rem;
@@ -185,7 +227,14 @@ h1{
     margin-right: 5rem;
     color: green;
 }
+.alert{
+    width: 250px;
+    font-size: 0.8rem;
+   }
+
 }
+
+
 @media only screen and (max-width: 500px) {
   body {
     background-color: lightblue;
@@ -197,8 +246,12 @@ h1{
     font-size: 1rem;
   }
   .link-item{
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     margin-left: -0.7rem;
+  }
+  .list-list{
+    font-size: 0.5rem;
+    font-weight: 500;
   }
   h2{
     font-size: 1rem;
@@ -209,9 +262,6 @@ h1{
   .btn{
     font-size: 0.8rem;
   }
-  .alert{
-    width: 100%;
-  }
   .form-control{
     width: 100%;
     background-color: #EEEEEE;
@@ -219,6 +269,7 @@ h1{
   }
   .mobile-des{
     margin-left: 3rem;
+    margin-top: 1.3rem;
   }
   .mobile-todo{
     margin-right: 3rem;
@@ -245,5 +296,9 @@ h1{
     float: right;
     margin-right: 2rem;
     color: green;
+  }
+  .alert{
+    width: 250px;
+    font-size: 0.8rem;
   }
 }
