@@ -135,6 +135,10 @@ h1{
     text-decoration: None;
     color: #76ABAE;
 }
+.list-list{
+    text-decoration: none;
+    color: #76ABAE;
+}
 .edit-button{
     border: none;
     padding: 0;
@@ -181,7 +185,7 @@ h1{
 }
 .footer-text{
     padding: 1rem;
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 .footer-link{
     text-decoration: none;
@@ -236,9 +240,6 @@ h1{
 
 
 @media only screen and (max-width: 500px) {
-  body {
-    background-color: lightblue;
-  }
   .todoapp{
     margin: 2rem 0 0 0;
   }

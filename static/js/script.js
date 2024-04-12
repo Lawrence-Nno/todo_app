@@ -19,6 +19,24 @@ document.addEventListener('click', function(event) {
 });
 });
 
+
+// JavaScript code to toggle the visibility of the rename link in list page
+const listItem = document.getElementById('listName');
+const listLink = document.getElementById('listLinks');
+
+listItem.addEventListener('contextmenu', function(event) {
+        event.preventDefault(); // Prevent default right-click behavior
+         // Toggle the visibility of list links
+        listLink.style.display = 'block';
+    });
+    // Hide list link on click outside
+document.addEventListener('click', function(event) {
+    if (event.target !== listItem) {
+        listLink.style.display = 'none';
+    }
+});
+
+
 // Checkbox javascript to change color of task text
 // Get the checkbox and text element
 const taskTexts = document.querySelectorAll('.taskText');

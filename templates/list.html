@@ -43,7 +43,11 @@
         <div class="row">
           <div class="col">
             <a href="{{ url_for('index') }}" class="index-lists"><h2>Todo Lists</h2></a>
-              <p class="list-list">{{ todo_list.list }}</p>
+              <a id="listName" class="list-list" href="#">{{ todo_list.list }}</a>
+              <ul id="listLinks" style="display: none;" class="dropdown-menu edit-links">
+               <li class="dropdown-item"><a href="{{ url_for('rename', list_id=todo_list.id) }}" class="index-lists">Rename</a></li>
+               <li class="dropdown-item"><a href="{{ url_for('delete_list', list_id=todo_list.id) }}" class="index-lists">Delete</a></li>
+              </ul>
           </div>
           <div class="col-9">
             <h2>Add a new task</h2>

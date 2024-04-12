@@ -95,6 +95,13 @@ class LoginForm(FlaskForm):
     submit = SubmitField(label="sign in", render_kw={"class": "btn btn-outline-success"})
 
 
+class ResetPasswordForm(FlaskForm):
+    email = EmailField(label="Enter your email:", validators=[input_required()], render_kw={"placeholder": "Email", "class": "form-control mb-3"})
+    password1 = PasswordField(label="Enter your new password:", validators=[input_required()], render_kw={"placeholder": "Password", "class": "form-control mb-3"})
+    password = PasswordField(label="Confirm your new password", validators=[input_required()], render_kw={"placeholder": "Confirm Password", "class": "form-control mb-3"})
+    submit = SubmitField(label="submit", render_kw={"class": "btn btn-outline-success"})
+
+
 class LogoutForm(FlaskForm):
     submit = SubmitField(label="log out")
 
@@ -116,7 +123,7 @@ def login():
     else:
         form_login = LoginForm()
         if form_login.validate_on_submit():
-            user = db.session.execute(db.select(User).where(User.email == form_login.email.data)).scalar()
+            user = db.session.execute(db.select(User).where(User.email == form_login.email.data.lower())).scalar()
             if user:
                 if check_password_hash(user.password, form_login.password.data):
                     login_user(user)
@@ -137,7 +144,7 @@ def register():
     if form.validate_on_submit():
         hashed_pass = generate_password_hash(form.password.data, method="pbkdf2:sha256", salt_length=8)
         new_user = User(
-            email=form.email.data,
+            email=form.email.data.lower(),
             username=form.username.data,
             password=hashed_pass
         )
@@ -146,6 +153,33 @@ def register():
         login_user(new_user)
         return redirect(url_for("index"))
     return render_template("register.html", form=form, footer_time=footer_time)
+
+
+@app.route('/reset_password', methods=["GET", "POST", "PATCH"])
+def reset_password():
+    form = ResetPasswordForm()
+    if request.method == "POST":
+        password1 = form.password1.data
+        password = form.password.data
+
+        if password != password1:
+            flash("Password mismatch, try again", "failure")
+            return redirect(url_for("reset_password"))
+
+        user_email = form.email.data.lower()
+        user = db.session.execute(db.select(User).where(User.email == user_email)).scalar()
+        if user:
+            method = request.form.get('_method', '').upper()
+            if method in ['PATCH', 'DELETE']:
+                hashed_pass = generate_password_hash(password, method="pbkdf2:sha256", salt_length=8)
+                user.password = hashed_pass
+                db.session.commit()
+                flash("Password successfully changed!", "success")
+                return redirect(url_for("login"))
+        else:
+            flash("Unrecognized email, please register", "failure")
+            return redirect(url_for("register"))
+    return render_template("reset_pass.html", form=form, footer_time=footer_time)
 
 
 @app.route('/home', methods=["GET", "POST"])
