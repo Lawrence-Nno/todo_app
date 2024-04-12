@@ -24,7 +24,7 @@ will not be easily deleted or erased.
 No installation required, It runs on web browsers.
 
 ## DEMO
-[![DEMO](https://github.com/Lawrence-Nno/Tic-Tac-Toe_game/blob/master/tic-tac-toe-image.png)](https://todo.lawrence-nno.online)
+[![DEMO](https://github.com/Lawrence-Nno/todo_app/blob/master/static/image/todo-smallsize.png?raw=true)](https://todo.lawrence-nno.online)
 
 ## Author
 - [Lawrence Nno](https://lawrence-nno.online)
