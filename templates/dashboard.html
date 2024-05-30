@@ -1,0 +1,46 @@
+{% extends "header.html" %}
+{% block content %}
+    <div class="container-fluid">
+      <div class="container-fluid">
+        <div class="row login-mob">
+          <div class="col">
+          </div>
+            <div class="col-9">
+              <a href="{{ url_for('index') }}" class="index-lists"><h1 class="todoapp">Todo App</h1></a>
+              {% for message in get_flashed_messages()  %}
+              <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+              {% endfor %}
+            </div>
+        </div>
+        <div class="row login-mob">
+          <div class="col">
+            <h2></h2>
+          </div>
+          <div class="col-9">
+            <h2 class="login-register">Dashboard</h2>
+            <table class="table table-striped">
+              <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+              </tr>
+              </thead>
+              <tbody>
+                {% for num, user in users: %}
+                <tr>
+                  <th scope="row">{{ num }}</th>
+                  <td>{{ user.username }}</td>
+                  <td>{{ user.email }}</td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
