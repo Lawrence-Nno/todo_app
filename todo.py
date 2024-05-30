@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, EmailField, PasswordField
 from wtforms.validators import input_required
@@ -8,6 +8,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from functools import wraps
 import os
 
 
@@ -44,7 +45,7 @@ db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 app.wsgi_app = HTTPMethodOverrideMiddleware(app.wsgi_app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todos.db"
-app.secret_key = os.environ['SECRET_KEY']
+app.secret_key = os.environ.get('SECRET_KEY')
 db.init_app(app)
 login_manager.init_app(app)
 footer_time = datetime.now()
@@ -53,7 +54,7 @@ footer_time = footer_time.strftime("%Y")
 
 class TodoList(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    list: Mapped[str] = mapped_column(unique=True)
+    list: Mapped[str]
     todo_tasks: Mapped[str] = relationship("TodoTask", back_populates="todolist")
     list_user: Mapped[str] = relationship("User", back_populates="user_list")
     list_user_id: Mapped[str] = mapped_column(ForeignKey("user.id"))
@@ -72,10 +73,6 @@ class User(db.Model, UserMixin):
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
     user_list: Mapped[str] = relationship("TodoList", back_populates="list_user")
-
-
-# with app.app_context():
-#     db.create_all()
 
 
 class TaskForm(FlaskForm):
@@ -116,6 +113,17 @@ def load_user(user_id):
     return db.session.execute(db.select(User).where(User.id == user_id)).scalar()
 
 
+def admin_decorator(func):
+    @wraps(func)
+    def wrapper_func(*args, **kwargs):
+        if current_user.email == 'lawrence.nno@gmail.com':
+            return func(*args, **kwargs)
+        else:
+            return abort(403)
+    # wrapper_func.__name__ = func.__name__
+    return wrapper_func
+
+
 @app.route('/', methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
@@ -134,7 +142,7 @@ def login():
             else:
                 flash("It seems you haven't registered, please do.", "failure")
                 return redirect(url_for("register"))
-        return render_template("login.html", form_login=form_login, footer_time=footer_time)
+        return render_template("login.html", form_login=form_login, logged_in=current_user.is_authenticated, footer_time=footer_time)
 
 
 @app.route('/register', methods=["GET", "POST"])
@@ -152,7 +160,7 @@ def register():
         db.session.commit()
         login_user(new_user)
         return redirect(url_for("index"))
-    return render_template("register.html", form=form, footer_time=footer_time)
+    return render_template("register.html", form=form, logged_in=current_user.is_authenticated, footer_time=footer_time)
 
 
 @app.route('/reset_password', methods=["GET", "POST", "PATCH"])
@@ -179,7 +187,7 @@ def reset_password():
         else:
             flash("Unrecognized email, please register", "failure")
             return redirect(url_for("register"))
-    return render_template("reset_pass.html", form=form, footer_time=footer_time)
+    return render_template("reset_pass.html", form=form, logged_in=current_user.is_authenticated, footer_time=footer_time)
 
 
 @app.route('/home', methods=["GET", "POST"])
@@ -228,6 +236,7 @@ def list_page(list_id):
         )
         db.session.add(new_task)
         db.session.commit()
+        # return redirect(url_for("list_page", list_id=list_id))
     return render_template('list.html', form=form, todo_list=todo_list, todo_tasks=todo_tasks, logged_in=current_user.is_authenticated, footer_time=footer_time)
 
 
@@ -306,6 +315,15 @@ def task_delete(task_id):
     return render_template('task_delete.html', form=form, todo_task=todo_task, logged_in=current_user.is_authenticated, footer_time=footer_time)
 
 
+@app.route('/dashboard', methods=["GET"])
+@login_required
+@admin_decorator
+def dashboard():
+    users = db.session.execute(db.select(User)).scalars()
+    indexed_users = [(num + 1, item) for num, item in enumerate(users)]
+    return render_template("dashboard.html", users=indexed_users, logged_in=current_user.is_authenticated, footer_time=footer_time)
+
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -315,3 +333,6 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+# with app.app_context():
+#     db.create_all()
