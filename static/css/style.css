@@ -87,6 +87,12 @@ body{
     position: relative;
     height: 100vh;
     color: #76ABAE;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+main{
+    flex-grow: 1;
 }
 
 h1{
@@ -179,9 +185,8 @@ h1{
 .footer{
     background-color: #76ABAE;
     color: white;
-    position: absolute;
-    bottom: 0;
     width: 100%;
+    margin-top: 1rem;
 }
 .footer-text{
     padding: 1rem;
@@ -190,6 +195,9 @@ h1{
 .footer-link{
     text-decoration: none;
     color: white;
+}
+.ms-autonav{
+    display: inline-block;
 }
 
 
